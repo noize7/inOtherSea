@@ -1,0 +1,38 @@
+[gd_scene format=3 uid="uid://wbvow5eer84"]
+
+[ext_resource type="Script" uid="uid://dops61t06nsud" path="res://scripts/floating_platform.gd" id="1_platform"]
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_plat"]
+friction = 0.85
+rough = true
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
+size = Vector2(400, 40)
+
+[node name="FloatingPlatform" type="RigidBody2D" unique_id=2137813279]
+mass = 25.0
+physics_material_override = SubResource("PhysicsMaterial_plat")
+lock_rotation = true
+script = ExtResource("1_platform")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=794593732]
+shape = SubResource("RectangleShape2D_1")
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=183270916]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -200.0
+offset_top = -20.0
+offset_right = 200.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.235294, 0.639216, 0.439216, 1)
+
+[node name="TrimLine" type="Line2D" parent="." unique_id=1841112869]
+points = PackedVector2Array(-200, -18, 200, -18)
+width = 3.0
+default_color = Color(0.35, 0.8, 0.55, 0.9)

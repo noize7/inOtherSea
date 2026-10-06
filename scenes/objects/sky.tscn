@@ -1,0 +1,33 @@
+[gd_scene format=3 uid="uid://cbb36hfmi66p3"]
+
+[ext_resource type="Script" uid="uid://ct7hms8nac1jm" path="res://scripts/sky.gd" id="1_sky"]
+[ext_resource type="Shader" uid="uid://bvq0tfxmfxt2" path="res://shaders/sky_gradient.gdshader" id="2_shader"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_sky"]
+shader = ExtResource("2_shader")
+shader_parameter/top_color = Color(0.36, 0.43, 0.64, 1)
+shader_parameter/mid_color = Color(0.7, 0.65, 0.76, 1)
+shader_parameter/bottom_color = Color(0.96, 0.74, 0.67, 1)
+shader_parameter/horizon_y = 545.0
+shader_parameter/gradient_height = 540.0
+shader_parameter/mid_offset = 0.5
+shader_parameter/blend_smoothness = 1.0
+shader_parameter/dither_strength = 0.005
+
+[node name="Sky" type="Node2D" unique_id=353720066]
+z_index = -50
+script = ExtResource("1_sky")
+
+[node name="SkyRect" type="ColorRect" parent="." unique_id=740320681]
+material = SubResource("ShaderMaterial_sky")
+offset_left = -3000.0
+offset_top = -2000.0
+offset_right = 3000.0
+offset_bottom = 556.0
+
+[node name="OceanDepthBack" type="ColorRect" parent="." unique_id=468810334]
+offset_left = -3011.0
+offset_top = 544.0
+offset_right = 2989.0
+offset_bottom = 2989.0
+color = Color(0.12156863, 0.4509804, 0.78039217, 0.7490196)
