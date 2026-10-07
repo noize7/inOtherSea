@@ -33,6 +33,9 @@ class WaterSpring:
 @export var surface_color: Color = Color(0.55, 0.90, 1.0, 0.95)
 @export var surface_line_width: float = 4.0
 
+@export_group("Effects")
+@export var splash_scene: PackedScene = preload("res://scenes/objects/water_splash.tscn")
+
 @onready var water_polygon: Polygon2D = $WaterPolygon
 @onready var surface_line: Line2D = $SurfaceLine
 @onready var water_area: Area2D = $WaterArea
@@ -40,6 +43,7 @@ class WaterSpring:
 
 var springs: Array[WaterSpring] = []
 var spring_distance: float = 0.0
+var is_initialized: bool = false
 
 func _ready() -> void:
 	_init_simulation()
@@ -47,6 +51,7 @@ func _ready() -> void:
 	_setup_area_physics()
 	water_area.body_entered.connect(_on_body_entered)
 	water_area.body_exited.connect(_on_body_exited)
+	get_tree().process_frame.connect(func(): is_initialized = true, CONNECT_ONE_SHOT)
 
 func _init_simulation() -> void:
 	springs.clear()
@@ -152,6 +157,8 @@ func splash(local_x: float, speed: float) -> void:
 func splash_at_global(global_x: float, speed: float) -> void:
 	var local_x = to_local(Vector2(global_x, 0.0)).x
 	splash(local_x, speed)
+	if absf(speed) >= 20.0:
+		emit_splash_particles(global_x, absf(speed) * 8.0, speed > 0.0)
 
 func get_water_height_at(global_x: float) -> float:
 	var local_x = to_local(Vector2(global_x, 0.0)).x
@@ -160,27 +167,55 @@ func get_water_height_at(global_x: float) -> float:
 	var index = clampi(int(round(local_x / spring_distance)), 0, springs.size() - 1)
 	return global_position.y + springs[index].height
 
+func emit_splash_particles(global_x: float, raw_speed: float, is_entering: bool = true) -> void:
+	if not is_initialized or not splash_scene:
+		return
+	var surface_y = get_water_height_at(global_x)
+	var splash_inst = splash_scene.instantiate()
+	splash_inst.global_position = Vector2(global_x, surface_y)
+	if splash_inst.has_method("trigger"):
+		splash_inst.trigger(raw_speed, is_entering)
+	
+	var parent_node = get_parent()
+	if parent_node:
+		parent_node.call_deferred("add_child", splash_inst)
+	else:
+		call_deferred("add_child", splash_inst)
 
 func _on_body_entered(body: Node2D) -> void:
-	var vel_y = 15.0
+	if body is FloatingPlatform:
+		return
+		
+	var raw_vel = 180.0
 	if "velocity" in body:
-		vel_y = body.velocity.y * 0.08
+		raw_vel = absf(body.velocity.y)
 	elif body is RigidBody2D:
-		vel_y = body.linear_velocity.y * 0.08
-	var local_pos = to_local(body.global_position)
-	splash(local_pos.x, clampf(vel_y, -35.0, 35.0))
+		raw_vel = absf(body.linear_velocity.y)
+	
+	if raw_vel >= 35.0:
+		var vel_y = clampf(raw_vel * 0.08, 10.0, 35.0)
+		var local_pos = to_local(body.global_position)
+		splash(local_pos.x, vel_y)
+		emit_splash_particles(body.global_position.x, raw_vel, true)
 	
 	if body.has_method("enter_water"):
 		body.enter_water()
 
 func _on_body_exited(body: Node2D) -> void:
-	var vel_y = -10.0
+	if body is FloatingPlatform:
+		return
+		
+	var raw_vel = 120.0
 	if "velocity" in body:
-		vel_y = body.velocity.y * 0.05
+		raw_vel = absf(body.velocity.y)
 	elif body is RigidBody2D:
-		vel_y = body.linear_velocity.y * 0.05
-	var local_pos = to_local(body.global_position)
-	splash(local_pos.x, clampf(vel_y, -25.0, 25.0))
+		raw_vel = absf(body.linear_velocity.y)
+	
+	if raw_vel >= 35.0:
+		var vel_y = -clampf(raw_vel * 0.05, 8.0, 25.0)
+		var local_pos = to_local(body.global_position)
+		splash(local_pos.x, vel_y)
+		emit_splash_particles(body.global_position.x, raw_vel * 0.7, false)
 	
 	if body.has_method("exit_water"):
 		body.exit_water()

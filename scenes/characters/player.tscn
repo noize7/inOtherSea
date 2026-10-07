@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://dcu0s5xn48qru"]
 
-[ext_resource type="Script" path="res://scripts/player.gd" id="1_player"]
+[ext_resource type="Script" uid="uid://c3a2y7vdvdiuu" path="res://scripts/player.gd" id="1_player"]
 [ext_resource type="Texture2D" uid="uid://pmhqbjwrb4wh" path="res://assets/textures/player/idle/1.png" id="2_idle1"]
 [ext_resource type="Texture2D" uid="uid://du73rgjlbhgvj" path="res://assets/textures/player/idle/2.png" id="3_idle2"]
 [ext_resource type="Texture2D" uid="uid://b1hxu4qrudnfc" path="res://assets/textures/player/walk/1.png" id="4_walk1"]
@@ -11,7 +11,7 @@
 [ext_resource type="Texture2D" uid="uid://cxxbsdi1wk2s" path="res://assets/textures/player/jump/2.png" id="9_jump2"]
 [ext_resource type="Texture2D" uid="uid://fwrif6xpl6o" path="res://assets/textures/player/jump/3.png" id="10_jump3"]
 [ext_resource type="Texture2D" uid="uid://dq7o8q1ptgut2" path="res://assets/textures/player/jump/4.png" id="11_jump4"]
-[ext_resource type="Script" path="res://scripts/player_camera.gd" id="12_cam"]
+[ext_resource type="Script" uid="uid://y1fcwq7mxj3p" path="res://scripts/player_camera.gd" id="12_cam"]
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_player"]
 animations = [{
@@ -22,7 +22,7 @@ animations = [{
 "duration": 1.0,
 "texture": ExtResource("3_idle2")
 }],
-"loop": true,
+"loop": 1,
 "name": &"idle",
 "speed": 4.0
 }, {
@@ -39,7 +39,7 @@ animations = [{
 "duration": 1.0,
 "texture": ExtResource("11_jump4")
 }],
-"loop": true,
+"loop": 1,
 "name": &"jump",
 "speed": 6.0
 }, {
@@ -56,14 +56,13 @@ animations = [{
 "duration": 1.0,
 "texture": ExtResource("7_walk4")
 }],
-"loop": true,
+"loop": 1,
 "name": &"walk",
 "speed": 8.0
 }]
 
-[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_player"]
-radius = 18.0
-height = 92.0
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_6irmp"]
+size = Vector2(47, 99)
 
 [node name="Player" type="CharacterBody2D" unique_id=949148251]
 script = ExtResource("1_player")
@@ -74,11 +73,11 @@ sprite_frames = SubResource("SpriteFrames_player")
 animation = &"idle"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=341092566]
-shape = SubResource("CapsuleShape2D_player")
+position = Vector2(1.5, 0.5)
+shape = SubResource("RectangleShape2D_6irmp")
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=728061386]
 top_level = true
 script = ExtResource("12_cam")
-follow_delay = 2.0
 follow_smooth_speed = 3.2
 max_leash_distance = 360.0

@@ -92,6 +92,11 @@ func _physics_process(delta: float) -> void:
 		if move_left: swim_vector.x -= 1.0
 		if swim_down: swim_vector.y += 1.0
 		if swim_up: swim_vector.y -= 1.0
+		elif (space_pressed or jump_just_pressed) and not swim_down:
+			swim_vector.y -= 1.0
+			if is_on_floor() and jump_just_pressed:
+				velocity.y = -220.0
+				_apply_scale_impulse(Vector2(0.86, 1.18))
 		
 		is_actively_swimming = swim_vector != Vector2.ZERO
 

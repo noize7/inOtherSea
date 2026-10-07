@@ -4,17 +4,39 @@
 [ext_resource type="PackedScene" uid="uid://6mhbxokscyqy" path="res://scenes/objects/water_2d.tscn" id="2_water"]
 [ext_resource type="PackedScene" uid="uid://wbvow5eer84" path="res://scenes/objects/floating_platform.tscn" id="3_platform"]
 [ext_resource type="PackedScene" uid="uid://dcu0s5xn48qru" path="res://scenes/characters/player.tscn" id="4_player"]
+[ext_resource type="PackedScene" path="res://scenes/objects/seabed.tscn" id="5_seabed"]
+[ext_resource type="PackedScene" path="res://scenes/props/rock_1.tscn" id="6_vqfsp"]
+[ext_resource type="PackedScene" path="res://scenes/props/rock_2.tscn" id="7_i6jx3"]
+[ext_resource type="PackedScene" path="res://scenes/props/rock_3.tscn" id="8_jn13j"]
 
 [node name="Base" type="Node2D" unique_id=2060032987]
 
 [node name="Sky" parent="." unique_id=702731808 instance=ExtResource("1_sky")]
 position = Vector2(0, -4.585)
 
-[node name="Water2D" parent="." unique_id=339562886 instance=ExtResource("2_water")]
-position = Vector2(-1360, 540)
+[node name="Seabed" parent="." unique_id=280941799 instance=ExtResource("5_seabed")]
+position = Vector2(-1360, 2080)
 
 [node name="FloatingPlatform" parent="." unique_id=895611218 instance=ExtResource("3_platform")]
 position = Vector2(640, 520)
 
+[node name="Decoration" type="Node2D" parent="." unique_id=1445766320]
+
+[node name="Rock1" parent="Decoration" unique_id=1862297716 instance=ExtResource("6_vqfsp")]
+position = Vector2(-1013, 1250)
+
+[node name="Rock4" parent="Decoration" unique_id=1162202429 instance=ExtResource("6_vqfsp")]
+position = Vector2(-1297, 1778.0001)
+rotation = 0.2268928
+
+[node name="Rock2" parent="Decoration" unique_id=2067950267 instance=ExtResource("7_i6jx3")]
+position = Vector2(-852, 1643)
+
+[node name="Rock3" parent="Decoration" unique_id=990268095 instance=ExtResource("8_jn13j")]
+position = Vector2(-1297, 1448)
+
 [node name="Player" parent="." unique_id=1249379333 instance=ExtResource("4_player")]
 position = Vector2(640, 455)
+
+[node name="Water2D" parent="." unique_id=339562886 instance=ExtResource("2_water")]
+position = Vector2(-1360, 540)

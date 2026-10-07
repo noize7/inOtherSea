@@ -1,0 +1,32 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/seabed.gd" id="1_seabed"]
+[ext_resource type="Shader" path="res://shaders/sand.gdshader" id="2_shader"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_sand"]
+shader = ExtResource("2_shader")
+shader_parameter/top_sand_color = Color(0.82, 0.72, 0.5, 1)
+shader_parameter/bottom_sand_color = Color(0.48, 0.38, 0.22, 1)
+shader_parameter/gradient_depth = 220.0
+shader_parameter/ripple_strength = 0.025
+shader_parameter/ripple_frequency = 90.0
+
+[node name="Seabed" type="StaticBody2D"]
+script = ExtResource("1_seabed")
+
+[node name="SandPolygon" type="Polygon2D" parent="."]
+material = SubResource("ShaderMaterial_sand")
+color = Color(0.82, 0.72, 0.5, 1)
+
+[node name="CrestLine" type="Line2D" parent="."]
+width = 4.0
+default_color = Color(0.95, 0.88, 0.66, 0.95)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
+
+[node name="LeftBoundary" type="CollisionShape2D" parent="."]
+
+[node name="RightBoundary" type="CollisionShape2D" parent="."]

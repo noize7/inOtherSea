@@ -1,0 +1,69 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/water_splash.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/textures/effects/droplet.png" id="2_droplet"]
+[ext_resource type="Texture2D" path="res://assets/textures/effects/bubble.png" id="3_bubble"]
+
+[sub_resource type="Gradient" id="Gradient_spray"]
+offsets = PackedFloat32Array(0, 0.7, 1)
+colors = PackedColorArray(1, 1, 1, 0.95, 0.8, 0.94, 1, 0.9, 0.5, 0.85, 1, 0)
+
+[sub_resource type="Gradient" id="Gradient_mist"]
+offsets = PackedFloat32Array(0, 0.5, 1)
+colors = PackedColorArray(1, 1, 1, 0.65, 0.8, 0.95, 1, 0.45, 0.6, 0.9, 1, 0)
+
+[sub_resource type="Gradient" id="Gradient_bubble"]
+offsets = PackedFloat32Array(0, 0.75, 1)
+colors = PackedColorArray(1, 1, 1, 0.9, 0.85, 0.95, 1, 0.8, 0.7, 0.9, 1, 0)
+
+[node name="WaterSplash" type="Node2D"]
+z_index = 10
+script = ExtResource("1_script")
+
+[node name="SprayParticles" type="CPUParticles2D" parent="."]
+emitting = false
+amount = 18
+texture = ExtResource("2_droplet")
+lifetime = 0.6
+one_shot = true
+explosiveness = 0.92
+direction = Vector2(0, -1)
+spread = 48.0
+gravity = Vector2(0, 850)
+initial_velocity_min = 220.0
+initial_velocity_max = 420.0
+scale_amount_min = 0.15
+scale_amount_max = 0.4
+color_ramp = SubResource("Gradient_spray")
+
+[node name="MistParticles" type="CPUParticles2D" parent="."]
+emitting = false
+amount = 14
+texture = ExtResource("2_droplet")
+lifetime = 0.35
+one_shot = true
+explosiveness = 0.95
+direction = Vector2(0, -1)
+spread = 70.0
+gravity = Vector2(0, 300)
+initial_velocity_min = 80.0
+initial_velocity_max = 180.0
+scale_amount_min = 0.1
+scale_amount_max = 0.25
+color_ramp = SubResource("Gradient_mist")
+
+[node name="BubbleParticles" type="CPUParticles2D" parent="."]
+emitting = false
+amount = 12
+texture = ExtResource("3_bubble")
+lifetime = 0.7
+one_shot = true
+explosiveness = 0.88
+direction = Vector2(0, 1)
+spread = 50.0
+gravity = Vector2(0, -260)
+initial_velocity_min = 80.0
+initial_velocity_max = 180.0
+scale_amount_min = 0.12
+scale_amount_max = 0.3
+color_ramp = SubResource("Gradient_bubble")
