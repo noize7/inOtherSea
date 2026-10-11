@@ -12,6 +12,10 @@ uniform float mid_offset : hint_range(0.1, 0.9) = 0.50;
 uniform float blend_smoothness : hint_range(0.1, 2.0) = 1.0;
 uniform float dither_strength : hint_range(0.0, 0.03) = 0.005;
 
+// Cloud haze controls
+uniform float cloud_opacity : hint_range(0.0, 0.5) = 0.18;
+uniform float cloud_speed : hint_range(0.001, 0.05) = 0.012;
+
 varying vec2 world_pos;
 
 void vertex() {
@@ -34,6 +38,16 @@ void fragment() {
 		factor = pow(smoothstep(0.0, 1.0, factor), blend_smoothness);
 		sky = mix(mid_color, bottom_color, factor);
 	}
+
+	// Soft atmospheric drifting twilight clouds / haze
+	float cloud_u = world_pos.x * 0.0008 + TIME * cloud_speed;
+	float cloud_v = world_pos.y * 0.0025;
+	float c1 = sin(cloud_u * 3.2 + sin(cloud_v * 3.8)) * 0.5 + 0.5;
+	float c2 = cos(cloud_u * 5.4 - cloud_v * 2.2 + TIME * (cloud_speed * 0.7)) * 0.5 + 0.5;
+	float cloud_shape = smoothstep(0.42, 0.82, c1 * c2);
+	float cloud_altitude = smoothstep(0.08, 0.35, t) * smoothstep(0.92, 0.60, t);
+	vec4 cloud_color = mix(vec4(0.85, 0.80, 0.90, 1.0), vec4(1.0, 0.84, 0.76, 1.0), t);
+	sky.rgb = mix(sky.rgb, cloud_color.rgb, cloud_shape * cloud_altitude * cloud_opacity);
 
 	// Subtle pseudo-random dither to prevent 8-bit color banding
 	float dither = fract(sin(dot(UV * 500.0, vec2(12.9898, 78.233))) * 43758.5453) - 0.5;

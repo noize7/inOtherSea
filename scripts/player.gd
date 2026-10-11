@@ -23,6 +23,7 @@ extends CharacterBody2D
 
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var collision_shape: CollisionShape2D = $CollisionShape2D
+@onready var swim_bubbles: CPUParticles2D = get_node_or_null("SwimBubbles")
 
 var gravity: float = ProjectSettings.get_setting("physics/2d/default_gravity", 980.0)
 var is_in_water: bool = false
@@ -183,9 +184,20 @@ func _update_animation_and_juice(delta: float) -> void:
 		var water_bob = sin(water_time * 4.0) * 0.025
 		var target_scale = Vector2(base_scale.x * (1.0 + water_bob * 0.5), base_scale.y * (1.0 - water_bob))
 		animated_sprite.scale = animated_sprite.scale.lerp(target_scale, 14.0 * delta)
+
+		# 4. Bubble trail when actively swimming
+		if swim_bubbles:
+			if is_actively_swimming and velocity.length() > 25.0:
+				swim_bubbles.emitting = true
+				swim_bubbles.direction = -velocity.normalized()
+			else:
+				swim_bubbles.emitting = false
 		return
 
 	# OUTSIDE WATER:
+	if swim_bubbles and swim_bubbles.emitting:
+		swim_bubbles.emitting = false
+
 	var direction = 0.0
 	if velocity.x > 15.0: direction = 1.0
 	elif velocity.x < -15.0: direction = -1.0

@@ -16,22 +16,27 @@ class WaterSpring:
 		water_depth = maxf(val, 20.0)
 		_setup_collision()
 		_update_mesh()
-@export var spring_count: int = 180:
+@export var spring_count: int = 220:
 	set(val):
 		spring_count = clampi(val, 10, 400)
 		_init_simulation()
 
-
 @export_group("Spring Physics")
-@export_range(0.005, 0.1, 0.001) var tension: float = 0.025
-@export_range(0.005, 0.1, 0.001) var dampening: float = 0.03
-@export_range(0.005, 0.1, 0.001) var spread: float = 0.025
+@export_range(0.005, 0.1, 0.001) var tension: float = 0.022
+@export_range(0.005, 0.1, 0.001) var dampening: float = 0.026
+@export_range(0.005, 0.1, 0.001) var spread: float = 0.028
 @export_range(1, 12, 1) var passes: int = 8
+
+@export_group("Ambient Waves")
+@export var enable_ambient_waves: bool = true
+@export_range(0.0, 15.0, 0.5) var ambient_amplitude: float = 4.0 ## Natural rolling ocean swell height
+@export_range(0.2, 4.0, 0.1) var ambient_speed: float = 1.25 ## Travel speed of swells
+@export_range(100.0, 1200.0, 10.0) var ambient_wavelength: float = 440.0 ## Length of primary swell wave
 
 @export_group("Visuals")
 @export var water_color: Color = Color(0.12, 0.45, 0.78, 0.75)
-@export var surface_color: Color = Color(0.55, 0.90, 1.0, 0.95)
-@export var surface_line_width: float = 4.0
+@export var surface_color: Color = Color(0.72, 0.94, 1.0, 0.95)
+@export var surface_line_width: float = 3.5
 
 @export_group("Effects")
 @export var splash_scene: PackedScene = preload("res://scenes/objects/water_splash.tscn")
@@ -44,6 +49,7 @@ class WaterSpring:
 var springs: Array[WaterSpring] = []
 var spring_distance: float = 0.0
 var is_initialized: bool = false
+var ambient_time: float = 0.0
 
 func _ready() -> void:
 	_init_simulation()
@@ -82,11 +88,50 @@ func _setup_area_physics() -> void:
 	water_area.angular_damp_space_override = Area2D.SPACE_OVERRIDE_COMBINE
 	water_area.angular_damp = 3.0
 
-func _physics_process(_delta: float) -> void:
+func _physics_process(delta: float) -> void:
 	if springs.is_empty():
 		return
 	
-	# Hooke's Law
+	ambient_time += delta * ambient_speed
+
+	# 1. Update ambient swell targets across all springs
+	if enable_ambient_waves:
+		var k1 = TAU / ambient_wavelength
+		var k2 = TAU / (ambient_wavelength * 0.44)
+		var k3 = TAU / (ambient_wavelength * 0.23)
+		for i in range(springs.size()):
+			var wx = i * spring_distance
+			var h1 = sin(wx * k1 - ambient_time) * ambient_amplitude
+			var h2 = sin(wx * k2 + ambient_time * 1.35) * (ambient_amplitude * 0.35)
+			var h3 = cos(wx * k3 - ambient_time * 1.8) * (ambient_amplitude * 0.15)
+			springs[i].target_height = h1 + h2 + h3
+	else:
+		for spring in springs:
+			spring.target_height = 0.0
+	
+	# 2. Continuous surface wake from swimming / moving bodies
+	if is_initialized and water_area:
+		var bodies = water_area.get_overlapping_bodies()
+		for body in bodies:
+			if body is FloatingPlatform:
+				continue
+			var body_x = body.global_position.x
+			var surface_y = get_water_height_at(body_x)
+			var dist_to_surface = absf(body.global_position.y - surface_y)
+			if dist_to_surface < 70.0:
+				var vel = Vector2.ZERO
+				if "velocity" in body:
+					vel = body.velocity
+				elif body is RigidBody2D:
+					vel = body.linear_velocity
+				
+				if vel.length() > 25.0:
+					var local_x = to_local(body.global_position).x
+					var wake_force = clampf(vel.length() * 0.008, 0.2, 1.8)
+					var dir = signf(vel.y) if absf(vel.y) > 20.0 else 0.4
+					splash(local_x, wake_force * dir)
+
+	# 3. Hooke's Law for spring network
 	for spring in springs:
 		var x = spring.height - spring.target_height
 		var loss = -dampening * spring.velocity
@@ -94,7 +139,7 @@ func _physics_process(_delta: float) -> void:
 		spring.velocity += force
 		spring.height += spring.velocity
 	
-	# Wave propagation
+	# 4. Wave propagation between adjacent springs
 	var count = springs.size()
 	var left_deltas: Array[float] = []
 	var right_deltas: Array[float] = []
@@ -150,9 +195,9 @@ func splash(local_x: float, speed: float) -> void:
 	var index = clampi(int(round(local_x / spring_distance)), 0, springs.size() - 1)
 	springs[index].velocity += speed
 	if index > 0:
-		springs[index - 1].velocity += speed * 0.5
+		springs[index - 1].velocity += speed * 0.6
 	if index < springs.size() - 1:
-		springs[index + 1].velocity += speed * 0.5
+		springs[index + 1].velocity += speed * 0.6
 
 func splash_at_global(global_x: float, speed: float) -> void:
 	var local_x = to_local(Vector2(global_x, 0.0)).x
